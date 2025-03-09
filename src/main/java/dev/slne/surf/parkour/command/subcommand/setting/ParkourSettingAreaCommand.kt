@@ -5,18 +5,14 @@ import dev.jorel.commandapi.arguments.LocationArgument
 import dev.jorel.commandapi.arguments.WorldArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.command.argument.ParkourArgument
 import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Area
-import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.Permission
-import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
-import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 
 class ParkourSettingAreaCommand(commandName: String) : CommandAPICommand(commandName) {
@@ -43,7 +39,11 @@ class ParkourSettingAreaCommand(commandName: String) : CommandAPICommand(command
                 this.world = world
             }
 
-            SurfParkour.send(player, MessageBuilder().primary("Du hast die Arena von ").info(parkour.name).primary(" neu definiert."))
+            player.send {
+                success("Du hast die Arena von ")
+                variableValue(parkour.name)
+                success(" neu definiert.")
+            }
         })
     }
 }

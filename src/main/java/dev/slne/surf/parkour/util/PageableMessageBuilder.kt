@@ -1,71 +1,96 @@
 package dev.slne.surf.parkour.util
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectList
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.clickRunsCommand
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
+import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
+import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.command.CommandSender
 import kotlin.math.ceil
 import kotlin.math.min
 
-class PageableMessageBuilder {
-    private val lines: ObjectList<Component> = ObjectArrayList()
-    private var pageCommand = "An error occurred while trying to display the page."
-    private var title: Component = Component.empty()
+@DslMarker
+annotation class PageableMessageBuilderDsl
 
-    fun addLine(line: Component): PageableMessageBuilder {
-        lines.add(line)
-        return this
+private const val LINES_PER_PAGE = 10
+
+@PageableMessageBuilderDsl
+class PageableMessageBuilder private constructor() {
+
+    private val lines = mutableObjectListOf<Component>()
+    var pageCommand = "An error occurred while trying to display the page."
+    var title: Component = Component.empty()
+
+    companion object {
+        operator fun invoke(block: PageableMessageBuilder.() -> Unit): PageableMessageBuilder {
+            return PageableMessageBuilder().apply(block)
+        }
     }
 
-    fun setTitle(title: Component): PageableMessageBuilder {
-        this.title = title
-        return this
+    fun line(block: SurfComponentBuilder.() -> Unit) {
+        lines.add(SurfComponentBuilder(block))
     }
 
-    fun setPageCommand(command: String): PageableMessageBuilder {
-        this.pageCommand = command
-        return this
+    fun title(block: SurfComponentBuilder.() -> Unit) {
+        title = SurfComponentBuilder(block)
     }
 
-    fun send(sender: CommandSender, page: Int) {
-        val linesPerPage = 10
-        val totalPages = ceil(lines.size.toDouble() / linesPerPage).toInt()
-        val start = (page - 1) * linesPerPage
-        val end: Int = min(start + linesPerPage, lines.size)
+    fun send(sender: Audience, page: Int) {
+        val totalPages = ceil(lines.size.toDouble() / LINES_PER_PAGE).toInt()
+        val start = (page - 1) * LINES_PER_PAGE
+        val end = min(start + LINES_PER_PAGE, lines.size)
 
         if (page < 1 || page > totalPages) {
-            sender.sendMessage(Component.text("Seite $page existiert nicht.", NamedTextColor.RED))
+            sender.sendText {
+                error("Seite ")
+                variableValue(page.toString())
+                error(" existiert nicht.")
+            }
             return
         }
 
-        var message: Component = title.append(MessageBuilder().darkSpacer(" (Seite $page von $totalPages)").build().decorate(TextDecoration.ITALIC)).append(Component.newline())
-        val navigation = this.getComponent(page, totalPages)
+        sender.sendText {
+            appendNewline()
+            append {
+                decorate(TextDecoration.ITALIC)
+                darkSpacer("Seite ")
+                variableValue(page.toString())
+                darkSpacer(" von ")
+                variableValue(totalPages.toString())
+            }
+            appendNewline()
 
-        for (i in start..<end) {
-            message = message.append(lines[i]).append(Component.newline()).decoration(TextDecoration.BOLD, false)
+            for (i in start..<end) {
+                append {
+                    append(lines[i])
+                    appendNewline()
+                    decoration(TextDecoration.BOLD, false)
+                }
+            }
+
+            getComponent(page, totalPages)?.let { append(it) }
         }
-
-        if (navigation != Component.empty()) {
-            message = message.append(navigation)
-        }
-
-        sender.sendMessage(Component.newline().append(message))
     }
 
-    private fun getComponent(page: Int, totalPages: Int): Component {
-        var navigation: Component = Component.empty()
+    private fun getComponent(page: Int, totalPages: Int): Component? {
+        if (page < 1 || page > totalPages) return null
 
-        if (page > 1) {
-            navigation = navigation.append(Component.text("[<< Zurück] ", Colors.SUCCESS).clickEvent(ClickEvent.runCommand(pageCommand.replace("%page%", (page - 1).toString()))))
+        return buildText {
+            if (page > 1) {
+                append {
+                    success("[<< Zurück] ")
+                    clickRunsCommand(pageCommand.replace("%page%", (page - 1).toString()))
+                }
+            }
+
+            if (page < totalPages) {
+                append {
+                    success("[Weiter >>]")
+                    clickRunsCommand(pageCommand.replace("%page%", (page + 1).toString()))
+                }
+            }
         }
-
-        if (page < totalPages) {
-            navigation = navigation.append(Component.text("[Weiter >>]", Colors.SUCCESS).clickEvent(ClickEvent.runCommand(pageCommand.replace("%page%", (page + 1).toString()))))
-        }
-
-        return navigation
     }
 }

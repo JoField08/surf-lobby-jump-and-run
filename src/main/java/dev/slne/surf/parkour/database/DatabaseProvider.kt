@@ -11,7 +11,7 @@ import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.serialization.ParkourSerializationModule
 import dev.slne.surf.parkour.util.Area
-import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.core.api.util.logger
 import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.toMutableObjectSet
@@ -20,7 +20,6 @@ import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.util.Vector
@@ -33,9 +32,8 @@ import kotlin.time.Duration.Companion.days
 
 
 object DatabaseProvider {
+    private val log = logger()
     private val config = plugin.config
-    private val logger = ComponentLogger.logger(this.javaClass)
-    private val gson = Gson()
     private val json = Json {
         ignoreUnknownKeys = true
         serializersModule = SerializersModule {
@@ -128,10 +126,8 @@ object DatabaseProvider {
                     "jdbc:sqlite:file:${dbFile.absolutePathString()}",
                     "org.sqlite.JDBC"
                 )
-                logger.info(
-                    MessageBuilder().withPrefix()
-                        .success("Successfully connected to database with sqlite!").build()
-                )
+                log.atInfo()
+                    .log("Successfully connected to database with sqlite!")
             }
 
             "external" -> {
@@ -147,17 +143,13 @@ object DatabaseProvider {
                     password = config.getString("database.password") ?: return
                 )
 
-                logger.info(
-                    MessageBuilder().withPrefix()
-                        .success("Successfully connected to database with mysql!").build()
-                )
+                log.atInfo()
+                    .log("Successfully connected to database with mysql!")
             }
 
             else -> {
-                logger.warn(
-                    MessageBuilder().withPrefix()
-                        .info("Unknown storage method \"$method\". Using local storage...").build()
-                )
+                log.atWarning()
+                    .log("Unknown storage method '%s'. Using local storage...", method)
 
                 Class.forName("org.sqlite.JDBC")
                 val dbFile = plugin.dataPath / "storage.db"
@@ -171,10 +163,8 @@ object DatabaseProvider {
                     "org.sqlite.JDBC"
                 )
 
-                logger.info(
-                    MessageBuilder().withPrefix()
-                        .success("Successfully connected to database with sqlite!").build()
-                )
+                log.atInfo()
+                    .log("Successfully connected to database with sqlite!")
             }
         }
 
@@ -219,13 +209,8 @@ object DatabaseProvider {
             }
         }
 
-        logger.info(
-            MessageBuilder().withPrefix().info(
-                "Saved ${
-                    dataCache.asMap().values.size
-                } player-data in ${duration}ms!"
-            ).build()
-        )
+        log.atInfo()
+            .log("Saved %d player-data in %dms!", dataCache.asMap().values.size, duration)
     }
 
     private fun replaceUser(data: PlayerData) {
@@ -279,12 +264,8 @@ object DatabaseProvider {
             }
         }
 
-        logger.info(
-            MessageBuilder()
-                .withPrefix()
-                .info("Fetched ${parkours.size} parkours in ${duration}ms!")
-                .build()
-        )
+        log.atInfo()
+            .log("Fetched %d parkours in %dms!", parkours.size, duration)
 
         this.parkourList.addAll(parkours)
     }
@@ -305,12 +286,8 @@ object DatabaseProvider {
             }
         }
 
-        logger.info(
-            MessageBuilder()
-                .withPrefix()
-                .info("Saved ${parkourList.size} parkours in ${duration}ms!")
-                .build()
-        )
+        log.atInfo()
+            .log("Saved %d parkours in %dms!", parkourList.size, duration)
     }
 
     suspend fun getEveryPlayerData(sortType: LeaderboardSortingType): ObjectList<PlayerData> {
@@ -325,23 +302,6 @@ object DatabaseProvider {
         sortType.sort(playerDataList)
 
         return playerDataList
-    }
-
-
-    private fun serializeVector(vector: Vector): String {
-        return gson.toJson(vector)
-    }
-
-    private fun deserializeVector(json: String): Vector {
-        return gson.fromJson(json, Vector::class.java)
-    }
-
-    private fun serializeList(list: List<String>): String {
-        return gson.toJson(list)
-    }
-
-    private fun deserializeList(json: String): List<String> {
-        return gson.fromJson(json, Array<String>::class.java).toList()
     }
 
     suspend fun getPlayerData(uuid: UUID): PlayerData {

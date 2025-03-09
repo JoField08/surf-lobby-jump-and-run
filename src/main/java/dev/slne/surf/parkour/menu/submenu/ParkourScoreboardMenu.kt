@@ -7,64 +7,85 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
-import dev.slne.surf.parkour.util.ItemBuilder
-import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.util.HeadUtil
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectList
-import net.kyori.adventure.text.Component
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
+import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.bukkit.api.builder.lore
+import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.text
+import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : ChestGui(
-    5,
-    ComponentHolder.of(MessageBuilder().primary("ʙᴇsᴛᴇɴʟɪsᴛᴇ").build().decorate(TextDecoration.BOLD))
-) {
-    private var sortingType = sorting
+class ParkourScoreboardMenu(player: Player, private var sorting: LeaderboardSortingType) :
+    ChestGui(5, ComponentHolder.of(buildText {
+        primary("Bestenliste".toSmallCaps())
+        decorate(TextDecoration.BOLD)
+    })) {
 
     init {
         plugin.launch {
-            val items: ObjectList<GuiItem> = ObjectArrayList()
+            val items = mutableObjectListOf<GuiItem>()
             val outlinePane = StaticPane(0, 0, 9, 5)
             val pages = PaginatedPane(1, 1, 7, 3)
-            val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
-            val backButton = GuiItem(ItemBuilder(Material.ARROW).setName(MessageBuilder().error("Vorherige Seite").build()).addLoreLine(MessageBuilder().info("Klicke, um die Seite zu wechseln!").build()).build()) {
+
+            val outlineItem = GuiItem(buildItem(Material.GRAY_STAINED_GLASS_PANE) {
+                displayName(text(" "))
+            })
+            val backButton = GuiItem(buildItem(Material.ARROW) {
+                displayName { primary("Vorherige Seite") }
+                lore {
+                    info("Klicke, um die Seite zu wechseln!")
+                }
+            }) {
                 if (pages.page > 0) {
                     pages.page -= 1
                     update()
                 }
             }
 
-            val continueButton = GuiItem(ItemBuilder(Material.ARROW).setName(MessageBuilder().success("Nächste Seite").build()).addLoreLine(MessageBuilder().info("Klicke, um die Seite zu wechseln!").build()).build()) {
+            val continueButton = GuiItem(buildItem(Material.ARROW) {
+                displayName { primary("Nächste Seite") }
+                lore {
+                    info("Klicke, um die Seite zu wechseln!")
+                }
+            }) {
                 if (pages.page < pages.pages - 1) {
                     pages.page += 1
                     update()
                 }
             }
 
-            val menuButton = GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build()).addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()) {
-                ParkourMenu(player)
-            }
+            val menuButton = GuiItem(buildItem(Material.BARRIER) {
+                displayName { primary("Hautmenü") }
+                lore {
+                    info("Klicke, um zum Hautmenü zurückzukehren!")
+                }
+            }) { ParkourMenu(player) }
 
-            val cycleButton = GuiItem(ItemBuilder(Material.COMPASS)
-                .setName(MessageBuilder().primary("Sortieren nach: ${sortingType.niceName}").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um die Sortierung zu ändern!").build())
-                .apply {
+            val cycleButton = GuiItem(buildItem(Material.COMPASS) {
+                displayName { primary("Sortieren nach: ${sorting.displayName}") }
+                buildLore {
+                    line { info("Klicke, um die Sortierung zu ändern!") }
                     LeaderboardSortingType.entries.forEach { type ->
-                        val indicator = if (type == sortingType) "> " else "  "
-                        addLoreLine(MessageBuilder().darkSpacer(indicator).info(type.niceName).build())
+                        line {
+                            darkSpacer(if (type == sorting) "> " else "  ")
+                            info(type.displayName)
+                        }
                     }
                 }
-                .build()) {
-                sortingType = LeaderboardSortingType.entries[(sortingType.ordinal + 1) % LeaderboardSortingType.entries.size]
-                ParkourScoreboardMenu(player, sortingType)
+            }) {
+                sorting = sorting.next()
+                ParkourScoreboardMenu(player, sorting)
             }
 
-            for (y in 0 until 5) {
-                for (x in 0 until 9) {
+            repeat(5) { y ->
+                repeat(9) { x ->
                     if (y == 4) {
                         outlinePane.addItem(outlineItem, 1, y)
                         outlinePane.addItem(outlineItem, 3, y)
@@ -81,26 +102,39 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
                 }
             }
 
-            for (playerData in DatabaseProvider.getEveryPlayerData(sortingType)) {
-                items.add(GuiItem(ItemBuilder(HeadUtil.getPlayerHead(playerData.uuid))
-                    .setName(MessageBuilder(playerData.name).build())
-                    .addLoreLine(Component.empty())
-                    .addLoreLine(MessageBuilder().info("Statistiken:").build())
-                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("${playerData.points}").build())
-                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("${playerData.trys}").build())
-                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("${playerData.highScore}").build())
-                    .build()))
-            }
+            DatabaseProvider.getEveryPlayerData(sorting)
+                .forEach { (uuid, name, highScore, points, trys) ->
+                    items += GuiItem(HeadUtil.getPlayerHead(uuid).apply {
+                        displayName(text(name))
+                        buildLore {
+                            line { }
+                            line { info("Statistiken:") }
+                            line {
+                                spacer("  - ")
+                                variableKey("Sprünge: ".toSmallCaps())
+                                variableValue(points.toString())
+                            }
+                            line {
+                                spacer("  - ")
+                                variableKey("Versuche: ".toSmallCaps())
+                                variableValue(trys.toString())
+                            }
+                            line {
+                                spacer("  - ")
+                                variableKey("Highscore: ".toSmallCaps())
+                                variableValue(highScore.toString())
+                            }
+                        }
+                    })
+                }
 
-
-
-            if(pages.page > 0) {
+            if (pages.page > 0) {
                 outlinePane.addItem(backButton, 2, 4)
             } else {
                 outlinePane.addItem(outlineItem, 2, 4)
             }
 
-            if(pages.page < pages.pages -1) {
+            if (pages.page < pages.pages - 1) {
                 outlinePane.addItem(continueButton, 6, 4)
             } else {
                 outlinePane.addItem(outlineItem, 6, 4)

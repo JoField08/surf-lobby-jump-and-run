@@ -4,10 +4,9 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.command.argument.ParkourArgument
 import dev.slne.surf.parkour.parkour.Parkour
-import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.PageableMessageBuilder
 import dev.slne.surf.parkour.util.Permission
 import dev.slne.surf.parkour.util.playerName
@@ -21,21 +20,31 @@ class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
             val page = args.getOrDefaultUnchecked("page", 1)
-            val message = PageableMessageBuilder()
 
-            if(parkour.activePlayers.isEmpty()) {
-                SurfParkour.send(player, MessageBuilder().error("Es sind keine Spieler in ").info(parkour.name).error(" aktiv."))
+            if (parkour.activePlayers.isEmpty()) {
+                player.send {
+                    error("Es sind keine Spieler in ")
+                    info(parkour.name)
+                    error(" aktiv.")
+                }
                 return@PlayerCommandExecutor
             }
 
-            message.setPageCommand("/parkour list ${parkour.name} %page%")
-            message.setTitle(MessageBuilder().primary("Spieler in ").info(parkour.name).build())
+            PageableMessageBuilder {
+                pageCommand = "/parkour list ${parkour.name} %page%"
+                title {
+                    primary("Spieler in ")
+                    variableValue(parkour.name)
+                }
 
-            for (activePlayer in parkour.activePlayers) {
-                message.addLine(MessageBuilder().darkSpacer("- ").variableValue(activePlayer.playerName()).darkSpacer(" (${parkour.currentPoints.getInt(activePlayer)})").build())
-            }
-
-            message.send(player, page)
+                parkour.activePlayers.forEach {
+                    line {
+                        spacer("- ")
+                        variableValue(it.playerName())
+                        info(" (${parkour.currentPoints.getInt(it)})")
+                    }
+                }
+            }.send(player, page)
         })
     }
 }

@@ -3,12 +3,11 @@ package dev.slne.surf.parkour.parkour
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import dev.jorel.commandapi.wrappers.Rotation
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.surfapi.core.api.messages.adventure.Sound
 import dev.slne.surf.surfapi.core.api.messages.adventure.Title
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendText
@@ -17,6 +16,9 @@ import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.ObjectSet
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
@@ -89,9 +91,9 @@ data class Parkour(
         generateInitial(player)
     }
 
-    suspend fun cancelParkour(player: Player) {
+    suspend fun cancelParkour(player: Player) = coroutineScope {
         val uuid = player.uniqueId
-        val latest = latestJumps[uuid] ?: return
+        val latest = latestJumps[uuid] ?: return@coroutineScope
 
         for (block in latest) {
             val blockApi = plugin.blockApi
@@ -101,7 +103,9 @@ data class Parkour(
             updateBlock(player, block.location, Material.AIR)
         }
 
-        player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
+        val tp = launch {
+            player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z)).await()
+        }
 
         updateHighscore(player)
         announceNewHighscore(player)
@@ -109,6 +113,8 @@ data class Parkour(
         currentPoints.removeInt(uuid)
         latestJumps.remove(uuid)
         activePlayers.remove(uuid)
+
+        tp.join()
     }
 
     private suspend fun generateInitial(player: Player) {
@@ -192,7 +198,12 @@ data class Parkour(
             }
 
         }
-        SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour).success(" gestartet").primary("!"))
+
+        player.send {
+            success("Du hast den Parkour ")
+            variableValue(parkour)
+            success(" gestartet!")
+        }
     }
 
     suspend fun announceNewScoredPoint(player: Player) {
@@ -213,7 +224,8 @@ data class Parkour(
         }
 
         player.sendActionBar(
-            Component.text("Rekord: $highscore Sprünge", Colors.GOLD).append(Component.text(" | ", Colors.SPACER))
+            Component.text("Rekord: $highscore Sprünge", Colors.GOLD)
+                .append(Component.text(" | ", Colors.SPACER))
                 .append(Component.text("Aktuelle Sprünge: $jumpCount", Colors.GOLD))
         )
     }
@@ -234,13 +246,12 @@ data class Parkour(
                 }, Sound.Emitter.self())
             }
         }
-        SurfParkour.send(
-            player,
-            MessageBuilder()
-                .primary("Du hast den Parkour mit ")
-                .variableValue("$currentScore Sprüngen")
-                .primary(" beendet.")
-        )
+
+        player.send {
+            info("Du hast den Parkour mit ")
+            variableValue("$currentScore Sprüngen")
+            info(" beendet.")
+        }
     }
 
     private suspend fun announceNewHighscore(player: Player) {
@@ -280,15 +291,13 @@ data class Parkour(
             }
         })
 
-        SurfParkour.send(
-            player, MessageBuilder()
-                .primary("Du hast deinen Highscore gebrochen! ")
-                .newLine()
-                .withPrefix()
-                .primary("Dein neuer Highscore liegt nun bei")
-                .component(Component.text(" $currentScore Sprüngen", Colors.GOLD))
-                .primary("!")
-        )
+        player.send {
+            success("Du hast deinen Highscore gebrochen! ")
+            appendNewPrefixedLine()
+            info("Dein neuer Highscore liegt nun bei")
+            variableValue(" $currentScore Sprüngen")
+            info("!")
+        }
     }
 
     /**
@@ -347,9 +356,10 @@ data class Parkour(
         val widthZ = maxZ - minZ
 
         if (widthX <= 20 || heightY <= 20 || widthZ <= 20) {
-            Bukkit.getConsoleSender().sendMessage("Could not find random location in region because it is to small.. Parkour cancelled..")
+            Bukkit.getConsoleSender()
+                .sendMessage("Could not find random location in region because it is to small.. Parkour cancelled..")
             cancelParkour(player)
-            SurfParkour.send(player, MessageBuilder().error("Es ist ein Fehler aufgetreten!"))
+            player.send { error("Es ist ein Fehler aufgetreten!") }
             return null
         }
 
@@ -401,7 +411,8 @@ data class Parkour(
         while (attempts < maxAttempts) {
             val heightOffset = random.nextInt(3) - 1
             val offset = offsets[random.nextInt(offsets.size)]
-            val nextLocation = previousLocation.clone().add(offset).add(0.0, heightOffset.toDouble(), 0.0)
+            val nextLocation =
+                previousLocation.clone().add(offset).add(0.0, heightOffset.toDouble(), 0.0)
 
             if (!isInRegion(nextLocation)) {
                 attempts++

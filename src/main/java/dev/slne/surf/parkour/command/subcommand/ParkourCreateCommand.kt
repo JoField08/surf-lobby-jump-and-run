@@ -7,12 +7,11 @@ import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.WorldArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import dev.jorel.commandapi.wrappers.Rotation
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.Permission
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import net.kyori.adventure.text.Component
@@ -21,7 +20,7 @@ import org.bukkit.Material
 import org.bukkit.World
 import java.util.*
 
-class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) {
+class ParkourCreateCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
         withPermission(Permission.COMMAND_PARKOUR_CREATE)
         withArguments(
@@ -53,8 +52,13 @@ class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) 
                 ObjectArraySet.of(Material.RED_CONCRETE),
                 ObjectArraySet()
             )
-            if (DatabaseProvider.getParkours().any { it.name == name }){
-                SurfParkour.send(player, MessageBuilder().primary("Der Parkour ").variableValue(name).error(" existiert bereits").primary("."))
+            if (DatabaseProvider.getParkours().any { it.name == name }) {
+                player.send {
+                    error("Der Parkour ")
+                    variableValue(name)
+                    error(" existiert bereits.")
+                }
+
                 return@PlayerCommandExecutor
             }
 
@@ -63,7 +67,12 @@ class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) 
             //SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(name).primary(" erstellt."))
 
             val createMessage = Component.text()
-                .append(Component.text("---------------------------------------------------------", Colors.SPACER))
+                .append(
+                    Component.text(
+                        "---------------------------------------------------------",
+                        Colors.SPACER
+                    )
+                )
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.text(" Du hast den Parkour ", Colors.PRIMARY))
@@ -82,11 +91,21 @@ class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) 
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.text("     - Position 1: ", Colors.PRIMARY))
-                .append(Component.text("${min.blockX}, ${min.blockY}, ${min.blockZ}", Colors.VARIABLE_VALUE))
+                .append(
+                    Component.text(
+                        "${min.blockX}, ${min.blockY}, ${min.blockZ}",
+                        Colors.VARIABLE_VALUE
+                    )
+                )
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.text("     - Position 2: ", Colors.PRIMARY))
-                .append(Component.text("${max.blockX}, ${max.blockY}, ${max.blockZ}", Colors.VARIABLE_VALUE))
+                .append(
+                    Component.text(
+                        "${max.blockX}, ${max.blockY}, ${max.blockZ}",
+                        Colors.VARIABLE_VALUE
+                    )
+                )
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.text("     - Startpunkt: ", Colors.PRIMARY))
@@ -94,13 +113,23 @@ class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) 
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.text("     - Respawnpunkt: ", Colors.PRIMARY))
-                .append(Component.text("${respawn.x}, ${respawn.y}, ${respawn.z}", Colors.VARIABLE_VALUE))
+                .append(
+                    Component.text(
+                        "${respawn.x}, ${respawn.y}, ${respawn.z}",
+                        Colors.VARIABLE_VALUE
+                    )
+                )
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.text("     - Rotation: ", Colors.PRIMARY))
                 .append(Component.text("${rotation.yaw} ${rotation.pitch}", Colors.VARIABLE_VALUE))
                 .append(Component.newline())
-                .append(Component.text("---------------------------------------------------------",Colors.SPACER))
+                .append(
+                    Component.text(
+                        "---------------------------------------------------------",
+                        Colors.SPACER
+                    )
+                )
                 .build()
 
             player.sendMessage(createMessage)

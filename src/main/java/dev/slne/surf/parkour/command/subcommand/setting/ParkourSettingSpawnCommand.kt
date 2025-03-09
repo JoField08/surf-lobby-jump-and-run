@@ -4,13 +4,10 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.LocationArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.command.argument.ParkourArgument
 import dev.slne.surf.parkour.parkour.Parkour
-import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Permission
-
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
@@ -28,7 +25,11 @@ class ParkourSettingSpawnCommand(commandName: String) : CommandAPICommand(comman
                 this.respawn = pos.toVector().normalize()
             }
 
-            SurfParkour.send(player, MessageBuilder().primary("Du hast den Spawn von ").info(parkour.name).primary(" neu definiert."))
+            player.send {
+                success("Du hast den Spawn von ")
+                variableValue(parkour.name)
+                success(" neu definiert.")
+            }
         })
     }
 }

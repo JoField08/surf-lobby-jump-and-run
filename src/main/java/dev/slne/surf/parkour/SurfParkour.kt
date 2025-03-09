@@ -2,21 +2,22 @@ package dev.slne.surf.parkour
 
 
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
-import com.github.shynixn.mccoroutine.folia.registerSuspendingEvents
-
 import dev.slne.surf.parkour.command.ParkourCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.listener.PlayerConnectionListener
 import dev.slne.surf.parkour.listener.PlayerInteractListener
 import dev.slne.surf.parkour.listener.PlayerParkourListener
-import dev.slne.surf.parkour.listener.PlayerConnectionListener
-
 import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.ItemBuilder
-import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
+import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.core.api.messages.adventure.appendText
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.text
+import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import fr.skytasul.glowingentities.GlowingBlocks
 import net.kyori.adventure.text.Component
-
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -49,19 +50,35 @@ class SurfParkour : SuspendingJavaPlugin() {
     }
 
     companion object {
-        val clickItem = ItemBuilder(Material.FIREWORK_ROCKET)
-            .setName(MessageBuilder("Jump`n Run").build())
-            .addLoreLine(Component.empty())
-            .addLoreLine(MessageBuilder().info("Parkour Informationen").build())
-            .addLoreLine(MessageBuilder().darkSpacer("   - ").info("Parkour starten").build())
-            .addLoreLine(MessageBuilder().darkSpacer("   - ").info("Leaderboard ansehen").build())
-            .addLoreLine(MessageBuilder().darkSpacer("   - ").info("Einstellungen verwalten").build())
-            .build()
+        val clickItem = buildItem(Material.FIREWORK_ROCKET) {
+            displayName(text("Jump'n Run"))
 
-        val instance = plugin
+            buildLore {
+                +Component.empty()
+                +text("Parkour Informationen", Colors.INFO)
 
-        fun send(player: Player, message: MessageBuilder) {
-            player.sendMessage(Colors.PREFIX.append(message.build()))
+                line {
+                    appendText("   - ", Colors.DARK_SPACER)
+                    appendText("Parkour starten", Colors.INFO)
+                }
+
+                line {
+                    appendText("   - ", Colors.DARK_SPACER)
+                    appendText("Leaderboard ansehen", Colors.INFO)
+                }
+
+                line {
+                    appendText("   - ", Colors.DARK_SPACER)
+                    appendText("Einstellungen verwalten", Colors.INFO)
+                }
+            }
         }
     }
+}
+
+inline fun Player.send(message: SurfComponentBuilder.() -> Unit) {
+    sendMessage(buildText {
+        appendPrefix()
+        message()
+    })
 }

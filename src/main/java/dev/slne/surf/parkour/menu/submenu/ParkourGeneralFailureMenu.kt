@@ -4,28 +4,38 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-
 import dev.slne.surf.parkour.menu.ParkourMenu
-import dev.slne.surf.parkour.util.ItemBuilder
-import dev.slne.surf.parkour.util.MessageBuilder
-
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.bukkit.api.builder.lore
+import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
-
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class ParkourGeneralFailureMenu(player: Player, title: MessageBuilder) : ChestGui(5, ComponentHolder.of(MessageBuilder().error("ᴜᴘѕ...").build().decorate(TextDecoration.BOLD))) {
+class ParkourGeneralFailureMenu(player: Player, title: Component) : ChestGui(
+    5,
+    ComponentHolder.of(buildText {
+        error("Ups...".toSmallCaps())
+        decorate(TextDecoration.BOLD)
+    })
+) {
     init {
         val outlinePane = StaticPane(0, 0, 9, 5)
-        val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
+        val outlineItem = GuiItem(buildItem(Material.GRAY_STAINED_GLASS_PANE) {
+            displayName(text(" "))
+        })
 
         val failurePane = StaticPane(4, 2, 1, 1)
-        val failureItem = GuiItem(ItemBuilder(Material.BARRIER).setName(title.build()).addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()) {
-            ParkourMenu(player)
-        }
+        val failureItem = GuiItem(buildItem(Material.BARRIER) {
+            displayName(title)
+            lore { info("Klicke, um zum Hautmenü zurückzukehren!") }
+        }) { ParkourMenu(player) }
 
-        for (x in 0 until 9) {
+        repeat(9) { x ->
             outlinePane.addItem(outlineItem, x, 0)
             outlinePane.addItem(outlineItem, x, 4)
         }
@@ -34,7 +44,7 @@ class ParkourGeneralFailureMenu(player: Player, title: MessageBuilder) : ChestGu
             outlinePane.addItem(outlineItem, 0, y)
             outlinePane.addItem(outlineItem, 8, y)
         }
-        
+
         failurePane.addItem(failureItem, 0, 0)
 
         addPane(outlinePane)
