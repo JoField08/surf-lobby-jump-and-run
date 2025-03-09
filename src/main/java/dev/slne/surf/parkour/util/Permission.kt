@@ -1,20 +1,24 @@
 package dev.slne.surf.parkour.util
 
 object Permission {
-    const val COMMAND_PARKOUR = "surf.parkour.command"
-    const val COMMAND_PARKOUR_CREATE = "surf.parkour.command.create"
-    const val COMMAND_PARKOUR_REMOVE = "surf.parkour.command.delete"
-    const val COMMAND_PARKOUR_START = "surf.parkour.command.start"
-    const val COMMAND_PARKOUR_TOGGLE = "surf.parkour.command.toggle"
-    const val COMMAND_PARKOUR_STATISTIC = "surf.parkour.command.stats"
-    const val COMMAND_PARKOUR_LIST = "surf.parkour.command.list"
+    private const val PREFIX = "surf.parkour"
+    private const val PREFIX_COMMAND = "$PREFIX.command"
 
-    const val COMMAND_PARKOUR_SETTING = "surf.parkour.command.setting"
-    const val COMMAND_PARKOUR_SETTING_AREA = "surf.parkour.command.setting.area"
-    const val COMMAND_PARKOUR_SETTING_SPAWN = "surf.parkour.command.setting.spawn"
-    const val COMMAND_PARKOUR_SETTING_START = "surf.parkour.command.setting.start"
-    const val COMMAND_PARKOUR_SETTING_MATERIAL = "surf.parkour.command.setting.material"
-    const val COMMAND_PARKOUR_SETTING_MATERIAL_ADD = "surf.parkour.command.setting.material.add"
-    const val COMMAND_PARKOUR_SETTING_MATERIAL_LIST = "surf.parkour.command.setting.material.list"
-    const val COMMAND_PARKOUR_SETTING_MATERIAL_REMOVE = "surf.parkour.command.setting.material.remove"
+    const val COMMAND_PARKOUR = PREFIX_COMMAND
+    const val COMMAND_PARKOUR_CREATE = "$PREFIX_COMMAND.create"
+    const val COMMAND_PARKOUR_REMOVE = "$PREFIX_COMMAND.delete"
+    const val COMMAND_PARKOUR_START = "$PREFIX_COMMAND.start"
+    const val COMMAND_PARKOUR_TOGGLE = "$PREFIX_COMMAND.toggle"
+    const val COMMAND_PARKOUR_STATISTIC = "$PREFIX_COMMAND.stats"
+    const val COMMAND_PARKOUR_LIST = "$PREFIX_COMMAND.list"
+
+    private const val PREFIX_SETTING = "$PREFIX_COMMAND.setting"
+    const val COMMAND_PARKOUR_SETTING = PREFIX_SETTING
+    const val COMMAND_PARKOUR_SETTING_AREA = "$PREFIX_SETTING.area"
+    const val COMMAND_PARKOUR_SETTING_SPAWN = "$PREFIX_SETTING.spawn"
+    const val COMMAND_PARKOUR_SETTING_START = "$PREFIX_SETTING.start"
+    const val COMMAND_PARKOUR_SETTING_MATERIAL = "$PREFIX_SETTING.material"
+    const val COMMAND_PARKOUR_SETTING_MATERIAL_ADD = "$PREFIX_SETTING.material.add"
+    const val COMMAND_PARKOUR_SETTING_MATERIAL_LIST = "$PREFIX_SETTING.material.list"
+    const val COMMAND_PARKOUR_SETTING_MATERIAL_REMOVE = "$PREFIX_SETTING.material.remove"
 }
