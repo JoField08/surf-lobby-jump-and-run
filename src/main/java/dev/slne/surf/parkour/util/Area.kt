@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import org.bukkit.util.Vector
 
 @Serializable
-data class Area (
+data class Area(
     var max: @Contextual Vector,
     var min: @Contextual Vector
 )
