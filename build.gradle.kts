@@ -4,26 +4,22 @@ plugins {
     id("dev.slne.surf.surfapi.gradle.paper-plugin")
 }
 
-group = "dev.slne"
+group = "dev.slne.surf.jnr"
 version = "1.21.4-2.0.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-}
-
 dependencies {
-    implementation("org.jetbrains.exposed:exposed-core:0.60.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.60.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.60.0")
+    implementation(libs.bundles.exposed) {
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        exclude("org.jetbrains.kotlin", "kotlin-reflect")
+        exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
+        exclude("org.slf4j", "slf4j-api")
+    }
 
-    implementation("fr.skytasul:glowingentities:1.4.3")
+    paperLibrary(libs.glowingentities)
 }
 
 surfPaperPluginApi {
     mainClass("dev.slne.surf.parkour.SurfParkour")
-
-    generateLibraryLoader(false)
 
     authors.add("SLNE Development")
     authors.add("Jo_field (Extern)")
