@@ -16,6 +16,7 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import fr.skytasul.glowingentities.GlowingBlocks
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -75,7 +76,7 @@ class SurfParkour : SuspendingJavaPlugin() {
     }
 }
 
-inline fun Player.send(message: SurfComponentBuilder.() -> Unit) {
+inline fun Audience.send(message: SurfComponentBuilder.() -> Unit) {
     sendMessage(buildText {
         appendPrefix()
         message()

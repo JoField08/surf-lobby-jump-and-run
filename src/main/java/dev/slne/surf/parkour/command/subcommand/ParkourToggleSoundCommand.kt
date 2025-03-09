@@ -2,19 +2,17 @@ package dev.slne.surf.parkour.command.subcommand
 
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.CommandAPICommand
-import dev.jorel.commandapi.executors.CommandArguments
-import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Permission
-import org.bukkit.entity.Player
 
 class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
         withPermission(Permission.COMMAND_PARKOUR_TOGGLE)
 
-        executesPlayer(PlayerCommandExecutor { player: Player, _: CommandArguments ->
+        playerExecutor { player, args ->
             plugin.launch {
                 val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
@@ -28,6 +26,6 @@ class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(command
                     info(".")
                 }
             }
-        })
+        }
     }
 }
