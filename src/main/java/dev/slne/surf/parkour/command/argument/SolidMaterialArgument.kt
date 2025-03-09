@@ -1,5 +1,7 @@
 package dev.slne.surf.parkour.command.argument
 
+import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.BlockStateArgument
 import dev.jorel.commandapi.arguments.CustomArgument
 import dev.slne.surf.parkour.util.failWithBuilder
@@ -21,3 +23,10 @@ class SolidMaterialArgument(nodeName: String) : CustomArgument<Material, BlockDa
 
         material
     })
+
+inline fun CommandAPICommand.solidMaterialArgument(
+    nodeName: String,
+    optional: Boolean = false,
+    block: Argument<*>.() -> Unit = {}
+): CommandAPICommand =
+    withArguments(SolidMaterialArgument(nodeName).setOptional(optional).apply(block))
