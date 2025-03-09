@@ -11,8 +11,8 @@ import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Area
-import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.Permission
+import dev.slne.surf.surfapi.core.api.messages.Colors
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import net.kyori.adventure.text.Component
 import org.bukkit.Location

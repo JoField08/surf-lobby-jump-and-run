@@ -8,8 +8,8 @@ import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.Permission
+import dev.slne.surf.surfapi.core.api.messages.Colors
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
@@ -27,21 +27,23 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
 
                 val parkour = Parkour.getParkour(target)
 
-                if(parkour == null) {
-                    player.sendMessage(createStatisticMessage(
-                        playerData.points.toString(),
-                        playerData.highScore.toString(),
-                        "Du spielst aktuell keinen Parkour",
-                        playerData.trys.toString()
+                if (parkour == null) {
+                    player.sendMessage(
+                        createStatisticMessage(
+                            playerData.points.toString(),
+                            playerData.highScore.toString(),
+                            "Du spielst aktuell keinen Parkour",
+                            playerData.trys.toString()
                         )
                     )
                 } else {
-                    player.sendMessage(createStatisticMessage(
-                        playerData.points.toString(),
-                        playerData.highScore.toString(),
-                        parkour.currentPoints.getInt(target.uniqueId).toString(),
-                        playerData.trys.toString()
-                    )
+                    player.sendMessage(
+                        createStatisticMessage(
+                            playerData.points.toString(),
+                            playerData.highScore.toString(),
+                            parkour.currentPoints.getInt(target.uniqueId).toString(),
+                            playerData.trys.toString()
+                        )
                     )
                 }
             }
@@ -93,7 +95,12 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 .append(Colors.PREFIX)
                 .append(Component.newline())
                 .append(Colors.PREFIX)
-                .append(Component.text("-----------------------------------------", Colors.SPACER))
+                .append(
+                    Component.text(
+                        "-----------------------------------------",
+                        Colors.SPACER
+                    )
+                )
         }
     }
 }

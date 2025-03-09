@@ -8,11 +8,10 @@ import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.listener.PlayerConnectionListener
 import dev.slne.surf.parkour.listener.PlayerInteractListener
 import dev.slne.surf.parkour.listener.PlayerParkourListener
-import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
-import dev.slne.surf.surfapi.core.api.messages.adventure.appendText
+import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
@@ -58,18 +57,18 @@ class SurfParkour : SuspendingJavaPlugin() {
                 +text("Parkour Informationen", Colors.INFO)
 
                 line {
-                    appendText("   - ", Colors.DARK_SPACER)
-                    appendText("Parkour starten", Colors.INFO)
+                    spacer("   - ")
+                    info("Parkour starten")
                 }
 
                 line {
-                    appendText("   - ", Colors.DARK_SPACER)
-                    appendText("Leaderboard ansehen", Colors.INFO)
+                    spacer("   - ")
+                    info("Leaderboard ansehen")
                 }
 
                 line {
-                    appendText("   - ", Colors.DARK_SPACER)
-                    appendText("Einstellungen verwalten", Colors.INFO)
+                    spacer("   - ")
+                    info("Einstellungen verwalten")
                 }
             }
         }

@@ -7,7 +7,7 @@ import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Area
-import dev.slne.surf.parkour.util.Colors
+import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.Sound
 import dev.slne.surf.surfapi.core.api.messages.adventure.Title
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendText
