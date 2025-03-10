@@ -22,9 +22,7 @@ class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
         subcommand(ParkourCreateCommand("create"))
         subcommand(ParkourRemoveCommand("remove"))
 
-        playerExecutor { player, _ ->
-            ParkourMenu(player)
-        }
+        playerExecutor { player, _ -> ParkourMenu.lazyOpen(player) }
     }
 }
 

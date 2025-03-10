@@ -6,14 +6,14 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 
-class PlayerInteractListener(): Listener {
+class PlayerInteractListener : Listener {
     @EventHandler
     fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         val item = event.item ?: return
 
-        if(item == SurfParkour.clickItem) {
-            ParkourMenu(player)
+        if (item == SurfParkour.clickItem) {
+            ParkourMenu.lazyOpen(player)
         }
     }
 }

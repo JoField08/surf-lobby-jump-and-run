@@ -9,79 +9,40 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.menu.type.RedirectType
+import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.player.PlayerData
+import dev.slne.surf.parkour.util.gui.*
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.surf.surfapi.core.api.messages.adventure.text
-import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
-import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
 
-class ParkourSelectMenu(private val redirect: RedirectType) :
+class ParkourSelectMenu(override val playerData: PlayerData, private val redirect: RedirectType) :
     ChestGui(5, ComponentHolder.of(buildText {
         primary("Parkour wählen".toSmallCaps())
         decorate(TextDecoration.BOLD)
-    })) {
+    })), PlayerDataHolderGui {
 
     private val outlinePane = StaticPane(0, 0, 9, 5)
     private val pages = PaginatedPane(1, 1, 7, 3)
-    private val items = mutableObjectListOf<GuiItem>()
 
-    private val outlineItem = GuiItem(buildItem(Material.GRAY_STAINED_GLASS_PANE) {
-        displayName(text(" "))
-    })
-    private val menuButton = GuiItem(buildItem(Material.BARRIER) {
-        displayName { primary("Hautmenü") }
-        lore { info("Klicke, um zum Hautmenü zurückzukehren!") }
-    }) { ParkourMenu(it.whoClicked as Player) }
-    private val backButton = GuiItem(buildItem(Material.ARROW) {
-        displayName { primary("Vorherige Seite") }
-        lore { info("Klicke, um die Seite zu wechseln!") }
-    }) {
-        if (pages.page > 0) {
-            pages.page -= 1
-            update()
-        }
-    }
-
-    private val continueButton = GuiItem(buildItem(Material.ARROW) {
-        displayName { primary("Nächste Seite") }
-        lore { info("Klicke, um die Seite zu wechseln!") }
-    }) {
-        if (pages.page < pages.pages - 1) {
-            pages.page += 1
-            update()
-        }
-    }
+    private val outlineItem = outlineItem()
+    private val menuButton = menuButton()
+    private val backButton = backButton(pages)
+    private val continueButton = nextButton(pages)
 
     init {
-        for (parkour in DatabaseProvider.getParkours()) {
-            items += GuiItem(buildItem(Material.COMPASS) {
+        val parkourItems = DatabaseProvider.getParkours().map { parkour ->
+            GuiItem(buildItem(Material.COMPASS) {
                 displayName { text(parkour.name) }
                 lore { info("Klicke, um den Parkour auszuwählen.") }
-            }) {
-                val player = it.whoClicked as Player
-                when (redirect) {
-                    RedirectType.MAIN -> ParkourMenu(player)
-                    RedirectType.PARKOUR_ACTIVES -> {
-                        if (parkour.activePlayers.isEmpty()) {
-                            ParkourGeneralFailureMenu(
-                                player,
-                                buildText { error("Es sind keine Spieler in diesem Parkour.") }
-                            )
-                            return@GuiItem
-                        }
-                        ParkourActivePlayersMenu(player, parkour)
-                    }
-
-                    RedirectType.START_PARKOUR -> plugin.launch { parkour.startParkour(player) }
-                }
-            }
+            }) { it.handleParkourSelect(parkour) }
         }
-        pages.populateWithGuiItems(items)
+        pages.populateWithGuiItems(parkourItems)
 
         for (x in 0 until 9) {
             outlinePane.addItem(outlineItem, x, 0)
@@ -101,9 +62,8 @@ class ParkourSelectMenu(private val redirect: RedirectType) :
         addPane(outlinePane)
         addPane(pages)
 
-
-        setOnGlobalDrag { it.isCancelled = true }
-        setOnGlobalClick { it.isCancelled = true }
+        cancelGlobalDrag()
+        cancelGlobalClick()
     }
 
     override fun update() {
@@ -119,5 +79,23 @@ class ParkourSelectMenu(private val redirect: RedirectType) :
             outlinePane.addItem(outlineItem, 6, 4)
         }
         super.update()
+    }
+
+    private fun InventoryClickEvent.handleParkourSelect(parkour: Parkour) {
+        when (redirect) {
+            RedirectType.MAIN -> ParkourMenu.lazyOpen(player)
+            RedirectType.PARKOUR_ACTIVES -> {
+                if (parkour.activePlayers.isEmpty()) {
+                    ParkourGeneralFailureMenu(
+                        playerData,
+                        buildText { error("Es sind keine Spieler in diesem Parkour.") }
+                    ).show(player)
+                    return
+                }
+                ParkourActivePlayersMenu(playerData, parkour).show(player)
+            }
+
+            RedirectType.START_PARKOUR -> plugin.launch { parkour.startParkour(player) }
+        }
     }
 }
