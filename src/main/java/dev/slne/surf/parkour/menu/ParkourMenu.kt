@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.menu
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
@@ -18,6 +19,7 @@ import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.int2ObjectMapOf
+import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -41,7 +43,12 @@ class ParkourMenu(playerData: PlayerData) : AbstractParkourGui(5, buildText {
         }
 
         fun lazyOpen(player: Player) {
-            plugin.launch { invoke(player).show(player) }
+            plugin.launch {
+                val menu = invoke(player)
+                withContext(plugin.entityDispatcher(player)) {
+                    menu.show(player)
+                }
+            }
         }
     }
 
