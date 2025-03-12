@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.util.gui
+package dev.slne.surf.parkour.menu
 
 import dev.slne.surf.parkour.player.PlayerData
 

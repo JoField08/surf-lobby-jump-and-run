@@ -24,6 +24,7 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 val plugin get() = JavaPlugin.getPlugin(SurfParkour::class.java)
+
 class SurfParkour : SuspendingJavaPlugin() {
 
     lateinit var blockApi: GlowingBlocks

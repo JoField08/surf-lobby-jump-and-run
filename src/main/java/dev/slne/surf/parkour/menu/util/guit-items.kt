@@ -1,9 +1,10 @@
-package dev.slne.surf.parkour.util.gui
+package dev.slne.surf.parkour.menu.util
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import dev.slne.surf.parkour.menu.ParkourMenu
+import dev.slne.surf.parkour.menu.PlayerDataHolderGui
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore

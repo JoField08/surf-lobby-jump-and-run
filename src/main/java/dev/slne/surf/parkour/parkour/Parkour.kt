@@ -479,6 +479,8 @@ data class Parkour(
         DatabaseProvider.getParkours().add(this)
     }
 
+    fun currentPoints(uuid: UUID) = currentPoints.getInt(uuid)
+
     private fun updateBlock(player: Player, blockLocation: Location, block: Material) {
         player.sendBlockChange(blockLocation, block.createBlockData())
     }
