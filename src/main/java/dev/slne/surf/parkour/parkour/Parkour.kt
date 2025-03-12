@@ -246,7 +246,7 @@ data class Parkour(
 
         val highscore = playerData.highScore
 
-        if (currentScore < highscore) {
+        if (currentScore <= highscore) {
             return
         }
 
