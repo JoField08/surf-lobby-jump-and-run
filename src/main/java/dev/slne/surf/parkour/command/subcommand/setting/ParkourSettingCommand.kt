@@ -12,7 +12,7 @@ class ParkourSettingCommand(commandName: String) : CommandAPICommand(commandName
         withPermission(Permission.COMMAND_PARKOUR_SETTING)
 
         subcommand(ParkourSettingAreaCommand("setArea"))
-        subcommand(ParkourSettingSpawnCommand("setSpawn"))
+        subcommand(ParkourSettingSpawnCommand("setRespawn"))
         subcommand(ParkourSettingStartCommand("setStart"))
     }
 }
