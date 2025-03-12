@@ -102,7 +102,7 @@ object DatabaseProvider {
             text("available_materials").transform( // TODO: 08.03.2025 10:15 - check set serialization
                 wrap = { json.decodeFromString<MutableSet<Material>>(it) },
                 unwrap = { json.encodeToString(it) }
-        )
+            )
 
         override val primaryKey = PrimaryKey(uuid)
     }
@@ -119,7 +119,6 @@ object DatabaseProvider {
                 val dbFile = plugin.dataPath / "storage.db"
 
                 if (dbFile.notExists()) {
-                    dbFile.createDirectories()
                     dbFile.createFile()
                 }
                 Database.connect(
