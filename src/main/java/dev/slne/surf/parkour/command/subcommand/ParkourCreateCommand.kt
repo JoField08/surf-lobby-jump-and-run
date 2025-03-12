@@ -60,7 +60,7 @@ class ParkourCreateCommand(commandName: String) : CommandAPICommand(commandName)
 
             sender.sendText {
                 appendPrefix()
-                spacer("---------------------------------------------------------")
+                spacer("-----------------------------------------------------")
                 appendNewPrefixedLine()
                 append {
                     primary("Der Parkour ")
@@ -70,48 +70,48 @@ class ParkourCreateCommand(commandName: String) : CommandAPICommand(commandName)
                 appendNewPrefixedLine()
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Name: ")
                     variableValue(name)
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Welt: ")
                     variableValue(world.name)
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Position 1: ")
                     variableValue("${min.blockX}, ${min.blockY}, ${min.blockZ}")
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Position 2: ")
                     variableValue("${max.blockX}, ${max.blockY}, ${max.blockZ}")
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Startpunkt: ")
                     variableValue("${start.x}, ${start.y}, ${start.z}")
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Respawnpunkt: ")
                     variableValue("${respawn.x}, ${respawn.y}, ${respawn.z}")
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Rotation: ")
                     variableValue("${rotation.yaw}, ${rotation.pitch}")
                 }
                 appendNewPrefixedLine()
-                spacer("---------------------------------------------------------")
+                spacer("-----------------------------------------------------")
             }
         }
     }
