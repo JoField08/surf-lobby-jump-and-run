@@ -28,7 +28,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                         createStatisticMessage(
                             playerData.points,
                             playerData.highScore,
-                            "Du spielst aktuell keinen Parkour",
+                            if (player == target) "Du spielst " else "${target.name} spielst" + " aktuell keinen Parkour",
                             playerData.trys
                         )
                     )
@@ -55,9 +55,9 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
         ) = buildText {
             appendNewPrefixedLine()
             append {
-                spacer("--------------- ")
+                spacer("---------------- ")
                 primary("Statistik")
-                spacer(" ---------------")
+                spacer(" ----------------")
             }
             appendNewPrefixedLine()
             appendNewPrefixedLine()
@@ -66,19 +66,19 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 appendNewPrefixedLine()
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Sprünge: ")
                     variableValue(points.toString())
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Rekord: ")
                     variableValue(highScore.toString())
                 }
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Versuche: ")
                     variableValue(trys.toString())
                 }
@@ -90,14 +90,14 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 appendNewPrefixedLine()
                 appendNewPrefixedLine()
                 append {
-                    spacer("    - ")
+                    spacer(" - ")
                     variableKey("Sprünge: ")
                     variableValue(current)
                 }
             }
             appendNewPrefixedLine()
             appendNewPrefixedLine()
-            spacer("-----------------------------------------")
+            spacer("----------------------------------------")
         }
     }
 }

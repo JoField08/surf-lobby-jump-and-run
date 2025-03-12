@@ -24,9 +24,9 @@ class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
 
             if (parkour.activePlayers.isEmpty()) {
                 sender.send {
-                    error("Es sind keine Spieler in ")
-                    info(parkour.name)
-                    error(" aktiv.")
+                    info("Es sind keine Spieler in ")
+                    variableValue(parkour.name)
+                    info(" aktiv.")
                 }
                 return@anyExecutor
             }
