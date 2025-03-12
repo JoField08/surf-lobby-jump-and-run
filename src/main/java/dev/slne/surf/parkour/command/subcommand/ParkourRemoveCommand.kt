@@ -20,7 +20,7 @@ class ParkourRemoveCommand(commandName: String) : CommandAPICommand(commandName)
 
         anyExecutor { sender, args ->
             val parkour: Parkour by args
-            val confirmed = args.getOrDefaultUnchecked("confirmed", false)
+            val confirmed = args.get("confirmed") != null
 
             if (!confirmed) {
                 sender.send {
