@@ -58,12 +58,6 @@ class ParkourSettingsMenu(playerData: PlayerData) : AbstractParkourGui(5, buildT
 
     private fun InventoryClickEvent.handleSoundSettings() {
         playerData.edit { likesSound = !likesSound }
-        player.send {
-            success("Die Parkour-Sounds sind nun ")
-            if (playerData.likesSound) success("aktiviert") else error("deaktiviert")
-            success(".")
-        }
-
         update()
     }
 }
