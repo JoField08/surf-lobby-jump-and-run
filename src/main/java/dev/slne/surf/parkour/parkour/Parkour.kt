@@ -9,8 +9,9 @@ import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.Sound
-import dev.slne.surf.surfapi.core.api.messages.adventure.Title
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendText
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.showTitle
 import dev.slne.surf.surfapi.core.api.util.mutableObject2IntMapOf
 import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
@@ -21,7 +22,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.sound.Sound
-import net.kyori.adventure.text.Component
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -33,6 +33,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.asKotlinRandom
 import kotlin.time.Duration.Companion.seconds
+import org.bukkit.Sound as BukkitSound
 
 private const val NO_CURRENT_POINTS = -1
 
@@ -71,20 +72,13 @@ data class Parkour(
         Vector(-3, 0, 0)
     )
 
-    /**
-     *
-     * Main parkour functions
-     *
-     */
     suspend fun startParkour(player: Player) {
-        this.cancelParkour(player)
-
-        val jumps = arrayOfNulls<Block>(3)
+        cancelParkour(player)
 
         val uuid = player.uniqueId
         activePlayers.add(uuid)
 
-        latestJumps[uuid] = jumps
+        latestJumps[uuid] = arrayOfNulls<Block>(3)
         currentPoints[uuid] = 0
 
         increaseTries(player)
@@ -94,9 +88,9 @@ data class Parkour(
     suspend fun cancelParkour(player: Player) = coroutineScope {
         val uuid = player.uniqueId
         val latest = latestJumps[uuid] ?: return@coroutineScope
+        val blockApi = plugin.blockApi
 
         for (block in latest) {
-            val blockApi = plugin.blockApi
             if (block == null) continue
 
             blockApi.unsetGlowing(block, player)
@@ -118,34 +112,29 @@ data class Parkour(
     }
 
     private suspend fun generateInitial(player: Player) {
-        val blockApi = plugin.blockApi
         val randomLocation = getRandomLocationInRegion(player, world) ?: return
         val uuid = player.uniqueId
+        val blockApi = plugin.blockApi
+        val jumps = latestJumps[uuid]!!
 
-        val start = randomLocation.add(0.0, 1.0, 0.0)
-        withContext(plugin.regionDispatcher(start)) {
-            val block = start.block
+        val initialLocation = randomLocation.add(0.0, 1.0, 0.0)
+        withContext(plugin.regionDispatcher(initialLocation)) {
+            val block = initialLocation.block
             val material = availableMaterials.random(random.asKotlinRandom())
 
             updateBlock(player, block.location, material)
-            latestJumps[uuid]!![0] = block
+            jumps[0] = block
 
-            val next = getValidBlock(start, player)
-
+            val next = getValidBlock(initialLocation, player)
             updateBlock(player, next.location, material)
             blockApi.setGlowing(next.location, player, ChatColor.WHITE)
-
-            latestJumps[uuid]!![1] = next
+            jumps[1] = next
 
             val next2 = getValidBlock(next.location, player)
-
             updateBlock(player, next2.location, material)
-            latestJumps[uuid]!![2] = next2
-
-            // scored point
+            jumps[2] = next2
 
             val rotation = getRotation(next.location)
-
             player.teleportAsync(
                 block.location.add(0.5, 1.0, 0.5).setRotation(rotation.yaw, rotation.pitch)
             )
@@ -154,16 +143,12 @@ data class Parkour(
     }
 
     suspend fun generate(player: Player) {
-        val blockApi = plugin.blockApi
         val uuid = player.uniqueId
+        val blockApi = plugin.blockApi
         val jumps = latestJumps[uuid] ?: return
         val material = blocks[uuid] ?: return
 
-        if (jumps[0] != null) {
-            val jump0 = jumps[0] ?: return
-
-            updateBlock(player, jump0.location, Material.AIR)
-        }
+        jumps[0]?.let { updateBlock(player, it.location, Material.AIR) }
 
         jumps[0] = jumps[1]
         jumps[1] = jumps[2]
@@ -176,27 +161,22 @@ data class Parkour(
         blockApi.unsetGlowing(block0.location, player)
 
         val nextJump = getValidBlock(block1.location, player)
-
         updateBlock(player, nextJump.location, material)
         jumps[2] = nextJump
     }
 
-    /**
-     * player feedback
-     *
-     */
+
     suspend fun announceNewParkourStarted(player: Player, parkour: String) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
                 player.playSound(Sound {
-                    type(org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING)
+                    type(BukkitSound.BLOCK_NOTE_BLOCK_PLING)
                     source(Sound.Source.MASTER)
                     volume(10f)
                     pitch(1f)
                 }, Sound.Emitter.self())
             }
-
         }
 
         player.send {
@@ -215,7 +195,7 @@ data class Parkour(
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
                 player.playSound(Sound {
-                    type(org.bukkit.Sound.ENTITY_CHICKEN_EGG)
+                    type(BukkitSound.ENTITY_CHICKEN_EGG)
                     source(Sound.Source.MASTER)
                     volume(10f)
                     pitch(1f)
@@ -224,9 +204,13 @@ data class Parkour(
         }
 
         player.sendActionBar(
-            Component.text("Rekord: $highscore Sprünge", Colors.GOLD)
-                .append(Component.text(" | ", Colors.SPACER))
-                .append(Component.text("Aktuelle Sprünge: $jumpCount", Colors.GOLD))
+            buildText {
+                variableKey("Rekord: ")
+                variableValue("$highscore Sprünge")
+                spacer(" | ")
+                variableKey("Aktuelle Sprünge: ")
+                variableValue("$jumpCount")
+            }
         )
     }
 
@@ -239,7 +223,7 @@ data class Parkour(
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
                 player.playSound(Sound {
-                    type(org.bukkit.Sound.ENTITY_VILLAGER_NO)
+                    type(BukkitSound.ENTITY_VILLAGER_NO)
                     source(Sound.Source.MASTER)
                     volume(10f)
                     pitch(1f)
@@ -269,7 +253,7 @@ data class Parkour(
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
                 player.playSound(Sound {
-                    type(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP)
+                    type(BukkitSound.ENTITY_PLAYER_LEVELUP)
                     source(Sound.Source.MASTER)
                     volume(10f)
                     pitch(1f)
@@ -277,7 +261,7 @@ data class Parkour(
             }
         }
 
-        player.showTitle(Title {
+        player.showTitle {
             title {
                 appendText("Herzlichen Glückwunsch!", Colors.GOLD)
             }
@@ -289,7 +273,7 @@ data class Parkour(
                 stay(2.seconds)
                 fadeOut(1.seconds)
             }
-        })
+        }
 
         player.send {
             success("Du hast deinen Highscore gebrochen! ")
@@ -300,15 +284,8 @@ data class Parkour(
         }
     }
 
-    /**
-     *
-     * Storage/Statistik functions
-     *
-     */
-
     private suspend fun increaseTries(player: Player) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
-
         playerData.edit { trys += 1 }
     }
 
@@ -335,11 +312,6 @@ data class Parkour(
         }
     }
 
-    /**
-     *
-     * Utility functions
-     *
-     */
     private suspend fun getRandomLocationInRegion(player: Player, world: World): Location? {
         val posOne = area.max
         val posTwo = area.min
