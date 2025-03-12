@@ -46,6 +46,7 @@ object HeadUtil {
                 val texture = textureCache.get(uuid)
                 val profile = Bukkit.createProfile(uuid)
                 profile.setProperty(ProfileProperty("textures", texture))
+                playerProfile = profile
             }
         }
     }
