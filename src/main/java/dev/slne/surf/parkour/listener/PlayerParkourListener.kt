@@ -2,10 +2,11 @@ package dev.slne.surf.parkour.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
+import com.github.shynixn.mccoroutine.folia.ticks
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.plugin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -54,6 +55,28 @@ class PlayerParkourListener : Listener {
                     parkour.announceNewScoredPoint(player)
                     parkour.generate(player)
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    fun onPlayerInteract(event: PlayerInteractEvent) {
+        val block = event.clickedBlock?.location ?: return
+        val player = event.player
+        val parkour = Parkour.getParkour(player) ?: return
+        val jumps = parkour.latestJumps[player.uniqueId] ?: return
+
+        val jump1 = jumps[0]?.location
+        val jump2 = jumps[1]?.location
+
+        if (block == jump1 || block == jump2) {
+            event.isCancelled = true
+
+            val material = parkour.blocks[player.uniqueId] ?: return
+            plugin.launch(plugin.regionDispatcher(block)) {
+                player.sendBlockChange(block, material.createBlockData())
+                delay(1.ticks)
+                player.sendBlockChange(block, material.createBlockData())
             }
         }
     }

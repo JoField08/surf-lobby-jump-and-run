@@ -14,6 +14,7 @@ class PlayerInteractListener : Listener {
 
         if (item == SurfParkour.clickItem) {
             ParkourMenu.lazyOpen(player)
+            event.isCancelled = true
         }
     }
 }
