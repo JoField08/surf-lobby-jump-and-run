@@ -25,7 +25,7 @@ class ParkourSettingsMenu(playerData: PlayerData) : AbstractParkourGui(5, buildT
 }, playerData), PlayerDataHolderGui {
     private val soundSettingsItem = updatingItem({
         buildItem(Material.JUKEBOX) {
-            displayName(text("Sound"))
+            displayName { primary("Sound") }
             buildLore {
                 line {
                     info("Der Sound ist aktuell ")
