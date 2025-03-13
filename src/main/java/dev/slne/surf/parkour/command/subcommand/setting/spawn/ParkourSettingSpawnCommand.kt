@@ -22,7 +22,7 @@ class ParkourSettingSpawnCommand(commandName: String) : CommandAPICommand(comman
             val parkour: Parkour by args
 
             parkour.edit {
-                respawn = pos.toVector().normalize()
+                respawn = pos.toVector()
             }
 
             sender.send {
