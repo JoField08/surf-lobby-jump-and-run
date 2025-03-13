@@ -14,14 +14,12 @@ import kotlin.math.min
 @DslMarker
 annotation class PageableMessageBuilderDsl
 
-private const val LINES_PER_PAGE = 10
-
 @PageableMessageBuilderDsl
-class PageableMessageBuilder private constructor() {
+class PageableMessageBuilder(private val linesPerPage: Int = 10) {
 
     private val lines = mutableObjectListOf<Component>()
     var pageCommand = "An error occurred while trying to display the page."
-    var title: Component = Component.empty()
+    private var title: Component = Component.empty()
 
     companion object {
         operator fun invoke(block: PageableMessageBuilder.() -> Unit): PageableMessageBuilder {
@@ -38,9 +36,9 @@ class PageableMessageBuilder private constructor() {
     }
 
     fun send(sender: Audience, page: Int) {
-        val totalPages = ceil(lines.size.toDouble() / LINES_PER_PAGE).toInt()
-        val start = (page - 1) * LINES_PER_PAGE
-        val end = min(start + LINES_PER_PAGE, lines.size)
+        val totalPages = ceil(lines.size.toDouble() / linesPerPage).toInt()
+        val start = (page - 1) * linesPerPage
+        val end = min(start + linesPerPage, lines.size)
 
         if (page < 1 || page > totalPages) {
             sender.sendText {
@@ -70,25 +68,39 @@ class PageableMessageBuilder private constructor() {
                 }
             }
 
-            getComponent(page, totalPages)?.let { append(it) }
+            append(getComponent(page, totalPages))
         }
     }
 
-    private fun getComponent(page: Int, totalPages: Int): Component? {
-        if (page < 1 || page > totalPages) return null
-
+    private fun getComponent(page: Int, totalPages: Int): Component {
         return buildText {
-            if (page > 1) {
-                append {
-                    success("[<< Zurück] ")
-                    clickRunsCommand(pageCommand.replace("%page%", (page - 1).toString()))
+            append {
+                if (page > 1) {
+                    success("[<<] ")
+                    clickRunsCommand(pageCommand.replace("%page%", "1"))
+                } else {
+                    error("[<<] ")
                 }
-            }
+                if (page > 1) {
+                    success("[<] ")
+                    clickRunsCommand(pageCommand.replace("%page%", (page - 1).toString()))
+                } else {
+                    error("[<] ")
+                }
 
-            if (page < totalPages) {
-                append {
-                    success("[Weiter >>]")
+                darkSpacer("Seite $page von $totalPages")
+
+                if (page < totalPages) {
+                    success(" [>] ")
                     clickRunsCommand(pageCommand.replace("%page%", (page + 1).toString()))
+                } else {
+                    error(" [>] ")
+                }
+                if (page < totalPages) {
+                    success(" [>>]")
+                    clickRunsCommand(pageCommand.replace("%page%", totalPages.toString()))
+                } else {
+                    error(" [>>]")
                 }
             }
         }
