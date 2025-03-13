@@ -25,7 +25,7 @@ class ParkourSettingsMenu(playerData: PlayerData) : AbstractParkourGui(5, buildT
 }, playerData), PlayerDataHolderGui {
     private val soundSettingsItem = updatingItem({
         buildItem(Material.JUKEBOX) {
-            displayName(text("Sound"))
+            displayName { primary("Sound") }
             buildLore {
                 line {
                     info("Der Sound ist aktuell ")
@@ -58,12 +58,6 @@ class ParkourSettingsMenu(playerData: PlayerData) : AbstractParkourGui(5, buildT
 
     private fun InventoryClickEvent.handleSoundSettings() {
         playerData.edit { likesSound = !likesSound }
-        player.send {
-            success("Die Parkour-Sounds sind nun ")
-            if (playerData.likesSound) success("aktiviert") else error("deaktiviert")
-            success(".")
-        }
-
         update()
     }
 }
