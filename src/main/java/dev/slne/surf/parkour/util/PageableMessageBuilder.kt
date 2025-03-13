@@ -52,11 +52,7 @@ class PageableMessageBuilder(private val linesPerPage: Int = 10) {
         sender.sendText {
             appendNewline()
             append {
-                decorate(TextDecoration.ITALIC)
-                darkSpacer("Seite ")
-                variableValue(page.toString())
-                darkSpacer(" von ")
-                variableValue(totalPages.toString())
+                title
             }
             appendNewline()
 
@@ -81,6 +77,7 @@ class PageableMessageBuilder(private val linesPerPage: Int = 10) {
                 } else {
                     error("[<<] ")
                 }
+
                 if (page > 1) {
                     success("[<] ")
                     clickRunsCommand(pageCommand.replace("%page%", (page - 1).toString()))
@@ -96,6 +93,7 @@ class PageableMessageBuilder(private val linesPerPage: Int = 10) {
                 } else {
                     error(" [>] ")
                 }
+
                 if (page < totalPages) {
                     success(" [>>]")
                     clickRunsCommand(pageCommand.replace("%page%", totalPages.toString()))
