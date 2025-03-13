@@ -20,14 +20,14 @@ class ParkourRemoveCommand(commandName: String) : CommandAPICommand(commandName)
 
         anyExecutor { sender, args ->
             val parkour: Parkour by args
-            val confirmed = args.get("confirmed") != null
+            val confirmed = args.getOrDefaultUnchecked("confirmed", false)
 
             if (!confirmed) {
                 sender.send {
                     info("Bist du dir sicher, dass du den Parkour ")
                     variableValue(parkour.name)
                     info(" löschen möchtest?")
-                    clickSuggestsCommand("/parkour remove ${parkour.name} --confirm")
+                    clickSuggestsCommand("/parkour delete ${parkour.name} --confirm")
                 }
 
                 return@anyExecutor
