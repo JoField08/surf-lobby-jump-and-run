@@ -189,7 +189,7 @@ data class Parkour(
     suspend fun announceNewScoredPoint(player: Player) {
         val uuid = player.uniqueId
         val playerData = DatabaseProvider.getPlayerData(uuid)
-        val jumpCount = currentPoints.getOrDefault(uuid, 1)
+        val jumpCount = currentPoints.getOrDefault(uuid as Any, 1)
         val highscore = playerData.highScore
 
         if (playerData.likesSound) {
