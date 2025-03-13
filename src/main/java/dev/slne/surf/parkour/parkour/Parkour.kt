@@ -273,11 +273,7 @@ data class Parkour(
         }
 
         player.send {
-            success("Du hast deinen Highscore gebrochen! ")
-            appendNewPrefixedLine()
-            info("Dein neuer Highscore liegt nun bei")
-            variableValue(" $currentScore Sprüngen")
-            info("!")
+            success("Du hast einen neuen Rekord aufgestellt!")
         }
     }
 
