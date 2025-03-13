@@ -20,7 +20,7 @@ class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
         subcommand(ParkourToggleSoundCommand("toggleSound"))
         subcommand(ParkourMaterialCommand("material"))
         subcommand(ParkourCreateCommand("create"))
-        subcommand(ParkourRemoveCommand("remove"))
+        subcommand(ParkourRemoveCommand("delete"))
 
         playerExecutor { player, _ -> ParkourMenu.lazyOpen(player) }
     }
