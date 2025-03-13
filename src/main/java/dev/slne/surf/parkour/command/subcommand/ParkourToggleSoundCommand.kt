@@ -21,7 +21,7 @@ class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(command
                 }
 
                 player.send {
-                    info("Die ParkourSounds sind nun ")
+                    info("Die Parkour-Sounds sind nun ")
                     if (playerData.likesSound) success("aktiviert") else error("deaktiviert")
                     info(".")
                 }
