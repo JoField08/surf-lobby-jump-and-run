@@ -29,9 +29,7 @@ class ParkourSelectMenu(playerData: PlayerData, private val redirect: RedirectTy
 
     private val outlineItem = outlineItem()
     private val outlinePane = StaticPane(0, 0, 9, 5).apply {
-        fillTopRow(outlineItem)
-        fillBottomRow(outlineItem, skipPositions = intSetOf(2, 4, 6))
-        fillLeftRightColumns(outlineItem)
+        fillBorder(outlineItem)
         addItem(menuButton(), 4, 4)
     }
 
