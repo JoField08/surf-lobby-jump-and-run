@@ -27,10 +27,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import java.util.*
-import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 import kotlin.random.asKotlinRandom
 import kotlin.time.Duration.Companion.seconds
 import org.bukkit.Sound as BukkitSound
@@ -134,7 +131,7 @@ data class Parkour(
             updateBlock(player, next2.location, material)
             jumps[2] = next2
 
-            val rotation = getRotation(next.location)
+            val rotation = getRotation(block.location, next.location)
             player.teleportAsync(
                 block.location.add(0.5, 1.0, 0.5).setRotation(rotation.yaw, rotation.pitch)
             )
@@ -348,11 +345,13 @@ data class Parkour(
         return Location(world, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
-    private fun getRotation(next: Location): Rotation {
-        val direction = next.toVector().subtract(start).normalize()
-        val yaw = Math.toDegrees(atan2(-direction.x, direction.z)).toFloat()
+    private fun getRotation(start: Location, next: Location): Rotation {
+        val direction = next.toVector().subtract(start.toVector()).normalize()
 
-        return Rotation(yaw, 0.0f)
+        val yaw = Math.toDegrees(atan2(-direction.x, direction.z)).toFloat()
+        val pitch = Math.toDegrees(asin(direction.y)).toFloat()
+
+        return Rotation(yaw, pitch)
     }
 
 
