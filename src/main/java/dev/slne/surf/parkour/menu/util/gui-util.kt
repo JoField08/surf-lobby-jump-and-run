@@ -89,3 +89,14 @@ fun StaticPane.fillActivePlayersBorder(borderItem: GuiItem, width: Int = 9, heig
         }
     }
 }
+
+fun StaticPane.fillBorder(borderItem: GuiItem, width: Int = 9, height: Int = 5) {
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            when {
+                y == 0 || y == height - 1 -> addItem(borderItem, x, y)
+                x == 0 || x == width - 1 -> addItem(borderItem, x, y)
+            }
+        }
+    }
+}

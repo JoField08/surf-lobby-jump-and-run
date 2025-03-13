@@ -29,7 +29,7 @@ class ParkourActivePlayersMenu(playerData: PlayerData, parkour: Parkour) :
 
     private val outlineItem = outlineItem()
     private val outlinePane = StaticPane(0, 0, 9, 5).apply {
-        fillActivePlayersBorder(outlineItem)
+        fillBorder(outlineItem)
         addItem(menuButton(), 4, 4)
     }
 

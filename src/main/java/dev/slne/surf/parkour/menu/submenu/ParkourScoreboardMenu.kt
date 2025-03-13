@@ -33,7 +33,7 @@ class ParkourScoreboardMenu(playerData: PlayerData, private var sorting: Leaderb
 
     private val outlineItem = outlineItem()
     private val outlinePane = StaticPane(0, 0, 9, 5).apply {
-        fillActivePlayersBorder(outlineItem)
+        fillBorder(outlineItem)
         addItem(menuButton(), 4, 4)
         addItem(GuiItem(buildItem(Material.COMPASS) {
             displayName { primary("Sortieren nach: ${sorting.displayName}") }
@@ -75,7 +75,7 @@ class ParkourScoreboardMenu(playerData: PlayerData, private var sorting: Leaderb
 
             while (guiItemsDeferred.isNotEmpty()) {
                 val completedItems = guiItemsDeferred.filter { it.isCompleted }
-                guiItemsDeferred -= completedItems
+                guiItemsDeferred -= completedItems.toSet()
 
                 val guiItems = completedItems.awaitAll()
                 if (guiItems.isNotEmpty()) {
